@@ -1,0 +1,290 @@
+package impl;
+import flash.utils.ByteArray;
+import haxe.io.Bytes;
+import haxe.io.BytesData;
+
+/**
+ * ...
+ * @author Daniel Uranga
+ */
+
+class BitStream 
+{
+	private static inline var WORD_BYTES = 4;
+	private static inline var WORD_BITS	= WORD_BYTES*8;
+	private static inline var BYTE_MASK	= 0xff;
+	private var buffer : BytesData;
+	private var pos : Int; //offset in the buffer array
+	private var cache : Int; //current 4 bytes, that are read from the buffer
+	private var bitsCached : Int; //remaining bits in current cache
+	private var position : Int; //number of total bits read
+
+	public function new(?data : BytesData)
+	{
+		reset();
+		buffer = new BytesData();
+		if ( data != null )
+		{
+			setData(data);
+		}
+	}
+	
+	public function setData(data : BytesData)
+	{
+		reset();
+		buffer = data;
+		/*
+		var size : Int;
+		size = WORD_BYTES * IntDivision.intDiv(data.length + WORD_BYTES - 1, WORD_BYTES);
+		buffer.length = size; // not needed
+		*/
+	}
+	
+	public function reset()
+	{
+		pos = 0;
+		bitsCached = 0;
+		cache = 0;
+		position = 0;
+	}
+	
+	public function destroy()
+	{
+		reset();
+		buffer = null;
+	}
+	
+	/**
+	 * Reads the next four bytes.
+	 * @param peek if true, the stream pointer will not be increased
+	 */
+	private function readCache(peek : Bool) : Int
+	{
+		var i : Int;
+		i = 0;
+		if (pos > buffer.length - WORD_BYTES)
+		{
+			throw("end of stream");
+		}
+		else
+		{
+			i = ((buffer[pos]&BYTE_MASK)<<24)
+				|((buffer[pos+1]&BYTE_MASK)<<16)
+				|((buffer[pos+2]&BYTE_MASK)<<8)
+				|(buffer[pos+3]&BYTE_MASK);
+		}
+		if (!peek)
+		{
+			pos += WORD_BYTES;
+		}
+		return i;
+	}
+	
+	public function skipBit()
+	{
+		position++;
+		if (bitsCached > 0)
+		{
+			bitsCached--;
+		}
+		else
+		{
+			cache = readCache(false);
+			bitsCached = WORD_BITS-1;
+		}
+	}
+	
+	public function skipBits(n : Int)
+	{
+		position += n;
+		if (n <= bitsCached)
+		{
+			bitsCached -= n;
+		}
+		else
+		{
+			n -= bitsCached;
+			while (n >= WORD_BITS)
+			{
+				n -= WORD_BITS;
+				readCache(false);
+			}
+			if (n > 0)
+			{
+				cache = readCache(false);
+				bitsCached = WORD_BITS - n;
+			}
+			else
+			{
+				cache = 0;
+				bitsCached = 0;
+			}
+		}
+	}
+	
+	public function byteAlign()
+	{
+		var toFlush : Int;
+		toFlush = bitsCached & 7;
+		if ( toFlush > 0 )
+		{
+			skipBits(toFlush);
+		}
+	}
+	
+	public function getPosition() : Int
+	{
+		return position;
+	}
+	
+	public function getBitsLeft() : Int
+	{
+		return 8 * (buffer.length - pos) + bitsCached;
+	}
+	
+	/**
+	 * The maskBits method could be replaced by a precomputed table in order to improve performance.
+	 */
+	public function maskBits(n : Int) : Int
+	{
+		var i : Int;
+		if ( n == 32 )
+		{
+			i = -1;
+		}
+		else
+		{
+			i =  (1 << n) - 1;
+		}
+		return i;
+	}
+		
+	public function readBits(n : Int) : Int
+	{
+		if (getBitsLeft() < n)
+		{
+			throw("invalid data: less than "+n+" bits left, buffer.length="+buffer.length+", pos="+pos+", bitsLeft="+bitsCached);
+		}
+		var result : Int;
+		/**
+		 * aca podria poner "position+=n" sacando factor comun, podria ser una optimizacion
+		 */
+		if ( bitsCached >= n )
+		{
+			bitsCached -= n;
+			result = (cache >> bitsCached) & maskBits(n);
+			position += n;
+		}
+		else
+		{
+			position += n;
+			var c : Int = cache&maskBits(bitsCached);
+			var left : Int = n-bitsCached;
+			cache = readCache(false);
+			bitsCached = WORD_BITS-left;
+			var x : Int = (cache>>bitsCached)&maskBits(left);
+			result = x|(c<<left);
+		}
+		return result;
+	}
+	
+	public function readBit() : Int
+	{
+		if (getBitsLeft() < 1)
+		{
+			throw("invalid data: less than 1 bit left, position: " + position);
+		}
+		var i : Int;
+		/**
+		 * TODO: aca podria poner "position++" sacando factor comun, podria ser una optimizacion
+		 */
+		if (bitsCached > 0)
+		{
+			bitsCached--;
+			i = (cache >> (bitsCached)) & 1;
+			position++;
+		}
+		else
+		{
+			cache = readCache(false);
+			bitsCached = WORD_BITS - 1;
+			position++;
+			i = (cache>>bitsCached)&1;
+		}
+		return i;
+	}
+	
+	public function readBool()
+	{
+		return (readBit()&0x1)!=0;
+	}
+	
+	public function peekBits(n : Int) : Int
+	{
+		var ret : Int;
+		if (bitsCached >= n)
+		{
+			ret = (cache>>(bitsCached-n))&maskBits(n);
+		}
+		else
+		{
+			//old cache
+			var c : Int;
+			var c2 : Int;
+			var word : Int;
+			c = cache&maskBits(bitsCached);
+			n -= bitsCached;
+			//read next
+			word = readCache(true);
+			//combine
+			c2 = (word>>WORD_BITS-n)&maskBits(n);
+			ret = c2|(c<<n);
+		}
+		return ret;
+	}
+	
+	public function peekBits_(n : Int) : Int
+	{
+		var ret : Int;
+		if (bitsCached >= n)
+		{
+			ret = (cache >> (bitsCached - n)) & maskBits(n);
+			trace("rama1");
+		}
+		else
+		{
+			trace("rama2");
+			//old cache
+			var c : Int;
+			var c2 : Int;
+			var word : Int;
+			c = cache & maskBits(bitsCached);
+			trace("bitstream1, c: " + c + " bitscached: " + bitsCached + " n: " + n + " lenght: " + buffer.length + " pos: " + pos);
+			n -= bitsCached;
+			//read next
+			word = readCache(true);
+			trace("bitstream2");
+			//combine
+			c2 = (word>>WORD_BITS-n)&maskBits(n);
+			ret = c2|(c<<n);
+		}
+		return ret;
+	}
+	
+	public function peekBit() : Int
+	{
+		var ret : Int;
+		if (bitsCached > 0)
+		{
+			ret = (cache>>(bitsCached-1))&1;
+		}
+		else
+		{			
+			var word : Int;
+			word = readCache(true);
+			ret = (word>>WORD_BITS-1)&1;
+		}
+		return ret;
+	}
+	
+}
