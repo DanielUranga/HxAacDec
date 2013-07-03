@@ -17,16 +17,12 @@
  *  License along with this library.
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package mp4.boxes.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullBox;
-import net.sourceforge.jaad.mp4.od.Descriptor;
-import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
+import mp4.MP4InputStream;
+import mp4.boxes.FullBox;
+import mp4.od.Descriptor;
+import mp4.od.ObjectDescriptor;
 
 /**
  * The IPMPInfoBox contains IPMP Descriptors which document the protection
@@ -54,22 +50,26 @@ import net.sourceforge.jaad.mp4.od.ObjectDescriptor;
  *
  * @author in-somnia
  */
-public class IPMPInfoBox extends FullBox {
+class IPMPInfoBox extends FullBox
+{
 
-	private List</*IPMP*/Descriptor> ipmpDescriptors;
+	var ipmpDescriptors : List</*IPMP*/Descriptor>;
 
-	public IPMPInfoBox() {
+	public function new()
+	{
 		super("IPMP Info Box");
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
+	override function decode(in_ : MP4InputStream)
+	{
+		super.decode(in_);
 
-		ipmpDescriptors = new ArrayList</*IPMP*/Descriptor>();
-		/*IPMP*/Descriptor desc;
-		while(getLeft(in)>0) {
-			desc = (/*IPMP*/Descriptor) ObjectDescriptor.createDescriptor(in);
+		//ipmpDescriptors = new ArrayList</*IPMP*/Descriptor>();
+		ipmpDescriptors = [];
+		var desc : /*IPMP*/Descriptor;
+		while (getLeft(in_) > 0)
+		{
+			desc = ObjectDescriptor.createDescriptor(in_);
 			ipmpDescriptors.add(desc);
 		}
 	}
@@ -79,7 +79,9 @@ public class IPMPInfoBox extends FullBox {
 	 *
 	 * @return the IPMP descriptors
 	 */
-	public List</*IPMP*/Descriptor> getIPMPDescriptors() {
-		return Collections.unmodifiableList(ipmpDescriptors);
+	public function getIPMPDescriptors()
+	{
+		//return Collections.unmodifiableList(ipmpDescriptors);
+		return ipmpDescriptors.copy();
 	}
 }

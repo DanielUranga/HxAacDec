@@ -17,11 +17,10 @@
  *  License along with this library.
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package mp4.boxes.impl;
 
-import java.io.IOException;
-import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullBox;
+import mp4.MP4InputStream;
+import mp4.boxes.FullBox;
 
 /**
  * The hint media header contains general information, independent of the
@@ -29,32 +28,38 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  *
  * @author in-somnia
  */
-public class HintMediaHeaderBox extends FullBox {
+class HintMediaHeaderBox extends FullBox
+{
 
-	private long maxPDUsize, avgPDUsize, maxBitrate, avgBitrate;
+	var maxPDUsize : Int;
+	var avgPDUsize : Int;
+	var maxBitrate : Int;
+	var avgBitrate : Int;
 
-	public HintMediaHeaderBox() {
+	public function new()
+	{
 		super("Hint Media Header Box");
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
+	override function decode(in_ : MP4InputStream)
+	{
+		super.decode(in_);
 
-		maxPDUsize = in.readBytes(2);
-		avgPDUsize = in.readBytes(2);
+		maxPDUsize = in_.readBytes(2);
+		avgPDUsize = in_.readBytes(2);
 
-		maxBitrate = in.readBytes(4);
-		avgBitrate = in.readBytes(4);
+		maxBitrate = in_.readBytes(4);
+		avgBitrate = in_.readBytes(4);
 
-		in.skipBytes(4); //reserved
+		in_.skipBytes(4); //reserved
 	}
 
 	/**
 	 * The maximum PDU size gives the size in bytes of the largest PDU (protocol
 	 * data unit) in this hint stream.
 	 */
-	public long getMaxPDUsize() {
+	public function getMaxPDUsize()
+	{
 		return maxPDUsize;
 	}
 
@@ -62,7 +67,8 @@ public class HintMediaHeaderBox extends FullBox {
 	 * The average PDU size gives the average size of a PDU over the entire
 	 * presentation.
 	 */
-	public long getAveragePDUsize() {
+	public function getAveragePDUsize()
+	{
 		return avgPDUsize;
 	}
 
@@ -70,7 +76,8 @@ public class HintMediaHeaderBox extends FullBox {
 	 * The maximum bitrate gives the maximum rate in bits/second over any window
 	 * of one second.
 	 */
-	public long getMaxBitrate() {
+	public function getMaxBitrate()
+	{
 		return maxBitrate;
 	}
 
@@ -78,7 +85,8 @@ public class HintMediaHeaderBox extends FullBox {
 	 * The average bitrate gives the average rate in bits/second over the entire
 	 * presentation.
 	 */
-	public long getAverageBitrate() {
+	public function getAverageBitrate()
+	{
 		return avgBitrate;
 	}
 }

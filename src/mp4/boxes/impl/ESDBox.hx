@@ -31,22 +31,24 @@ import mp4.od.ObjectDescriptor;
  * 
  * @author in-somnia
  */
-public class ESDBox extends FullBox {
+class ESDBox extends FullBox
+{
+	
+	var esd : ESDescriptor;
 
-	private ESDescriptor esd;
-
-	public ESDBox() {
+	public function new()
+	{
 		super("ESD Box");
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
-		
-		esd = (ESDescriptor) ObjectDescriptor.createDescriptor(in);
+	override funcction decode(in_ : MP4InputStream)
+	{
+		super.decode(in_);
+		esd = ObjectDescriptor.createDescriptor(in_);
 	}
 
-	public ESDescriptor getEntryDescriptor() {
+	public function getEntryDescriptor()
+	{
 		return esd;
 	}
 }

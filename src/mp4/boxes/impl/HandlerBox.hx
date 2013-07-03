@@ -17,11 +17,10 @@
  *  License along with this library.
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package mp4.boxes.impl;
 
-import java.io.IOException;
-import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullBox;
+import mp4.MP4InputStream;
+import mp4.boxes.FullBox;
 
 /**
  * This box within a Media Box declares the process by which the media-data in
@@ -38,42 +37,44 @@ import net.sourceforge.jaad.mp4.boxes.FullBox;
  * XML is also supplied.
  * @author in-somnia
  */
-public class HandlerBox extends FullBox {
+class HandlerBox extends FullBox
+{
 
 	//ISO BMFF types
-	public static final int TYPE_VIDEO = 1986618469; //vide
-	public static final int TYPE_SOUND = 1936684398; //soun
-	public static final int TYPE_HINT = 1751740020; //hint
-	public static final int TYPE_META = 1835365473; //meta
-	public static final int TYPE_NULL = 1853189228; //null
+	public static var TYPE_VIDEO = 1986618469; //vide
+	public static var TYPE_SOUND = 1936684398; //soun
+	public static var TYPE_HINT = 1751740020; //hint
+	public static var TYPE_META = 1835365473; //meta
+	public static var TYPE_NULL = 1853189228; //null
 	//MP4 types
-	public static final int TYPE_ODSM = 1868854125; //odsm
-	public static final int TYPE_CRSM = 1668445037; //crsm
-	public static final int TYPE_SDSM = 1935962989; //sdsm
-	public static final int TYPE_M7SM = 1832350573; //m7sm
-	public static final int TYPE_OCSM = 1868788589; //ocsm
-	public static final int TYPE_IPSM = 1768977261; //ipsm
-	public static final int TYPE_MJSM = 1835692909; //mjsm
-	private long handlerType;
-	private String handlerName;
+	public static var TYPE_ODSM = 1868854125; //odsm
+	public static var TYPE_CRSM = 1668445037; //crsm
+	public static var TYPE_SDSM = 1935962989; //sdsm
+	public static var TYPE_M7SM = 1832350573; //m7sm
+	public static var TYPE_OCSM = 1868788589; //ocsm
+	public static var TYPE_IPSM = 1768977261; //ipsm
+	public static var TYPE_MJSM = 1835692909; //mjsm
+	var handlerType : Int;
+	var handlerName : String;
 
-	public HandlerBox() {
+	public function new()
+	{
 		super("Handler Box");
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
+	override function decode(in_ : MP4InputStream)
+	{
+		super.decode(in_);
 
-		in.skipBytes(4); //pre-defined: 0
+		in_.skipBytes(4); //pre-defined: 0
 
-		handlerType = in.readBytes(4);
+		handlerType = in_.readBytes(4);
 
-		in.readBytes(4); //reserved
-		in.readBytes(4); //reserved
-		in.readBytes(4); //reserved
+		in_.readBytes(4); //reserved
+		in_.readBytes(4); //reserved
+		in_.readBytes(4); //reserved
 
-		handlerName = in.readUTFString((int) getLeft(in), MP4InputStream.UTF8);
+		handlerName = in_.readUTFString(getLeft(in_), MP4InputStream.UTF8);
 	}
 
 	/**
@@ -93,7 +94,8 @@ public class HandlerBox extends FullBox {
 	 *
 	 * @return the handler type
 	 */
-	public long getHandlerType() {
+	public function getHandlerType()
+	{
 		return handlerType;
 	}
 
@@ -103,7 +105,8 @@ public class HandlerBox extends FullBox {
 	 * 
 	 * @return the handler type's name
 	 */
-	public String getHandlerName() {
+	public function getHandlerName()
+	{
 		return handlerName;
 	}
 }

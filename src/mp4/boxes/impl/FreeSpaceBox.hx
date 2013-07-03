@@ -17,11 +17,10 @@
  *  License along with this library.
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package mp4.boxes.impl;
 
-import java.io.IOException;
-import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.BoxImpl;
+import mp4.MP4InputStream;
+import mp4.boxes.BoxImpl;
 
 /**
  * This class is used for all boxes, that are known but don't contain necessary 
@@ -29,14 +28,16 @@ import net.sourceforge.jaad.mp4.boxes.BoxImpl;
  * 
  * @author in-somnia
  */
-public class FreeSpaceBox extends BoxImpl {
+class FreeSpaceBox extends BoxImpl
+{
 
-	public FreeSpaceBox() {
+	public function new()
+	{
 		super("Free Space Box");
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
+	override function decode(in_ : MP4InputStream)
+	{
 		//no need to read, box will be skipped
 	}
 }

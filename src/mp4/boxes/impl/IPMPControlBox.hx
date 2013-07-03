@@ -17,12 +17,11 @@
  *  License along with this library.
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.sourceforge.jaad.mp4.boxes.impl;
+package mp4.boxes.impl;
 
-import java.io.IOException;
-import net.sourceforge.jaad.mp4.MP4InputStream;
-import net.sourceforge.jaad.mp4.boxes.FullBox;
-import net.sourceforge.jaad.mp4.od.Descriptor;
+import mp4.MP4InputStream;
+import mp4.boxes.FullBox;
+import mp4.od.Descriptor;
 
 /**
  * The IPMP Control Box may contain IPMP descriptors which may be referenced by
@@ -40,26 +39,31 @@ import net.sourceforge.jaad.mp4.od.Descriptor;
  *
  * @author in-somnia
  */
-public class IPMPControlBox extends FullBox {
+class IPMPControlBox extends FullBox
+{
 
-	private /*IPMPToolList*/Descriptor toolList;
-	private /*IPMP*/Descriptor[] ipmpDescriptors;
+	var toolList : /*IPMPToolList*/Descriptor;
+	var ipmpDescriptors : Array<Descriptor>;
 
-	public IPMPControlBox() {
+	public function new()
+	{
 		super("IPMP Control Box");
 	}
 
-	@Override
-	public void decode(MP4InputStream in) throws IOException {
-		super.decode(in);
+	override function decode(in_ : MP4InputStream)
+	{
+		super.decode(in_);
 
-		toolList = /*(IPMPToolListDescriptor)*/ Descriptor.createDescriptor(in);
+		toolList = /*(IPMPToolListDescriptor)*/ Descriptor.createDescriptor(in_);
 
-		final int count = in.read();
+		var count = in_.read();
 
-		ipmpDescriptors = new Descriptor[count];
-		for(int i = 0; i<count; i++) {
-			ipmpDescriptors[i] = /*(IPMPDescriptor)*/ Descriptor.createDescriptor(in);
+		//ipmpDescriptors = new Descriptor[count];
+		ipmpDescriptors = [];
+		ipmpDescriptors.length = count;
+		for (i in 0...count)
+		{
+			ipmpDescriptors[i] = /*(IPMPDescriptor)*/ Descriptor.createDescriptor(in_);
 		}
 	}
 
@@ -68,7 +72,8 @@ public class IPMPControlBox extends FullBox {
 	 *
 	 * @return the toollist
 	 */
-	public Descriptor getToolList() {
+	public function getToolList()
+	{
 		return toolList;
 	}
 
@@ -77,7 +82,8 @@ public class IPMPControlBox extends FullBox {
 	 *
 	 * @return the IPMP descriptors
 	 */
-	public Descriptor[] getIPMPDescriptors() {
+	public function getIPMPDescriptors()
+	{
 		return ipmpDescriptors;
 	}
 }
