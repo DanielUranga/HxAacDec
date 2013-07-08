@@ -1,80 +1,56 @@
-/*
- *  Copyright (C) 2011 in-somnia
- * 
- *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
- *  License, or (at your option) any later version.
- *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
- *  Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library.
- *  If not, see <http://www.gnu.org/licenses/>.
- */
 package mp4.boxes.impl;
-
-import mp4.MP4InputStream;
 import mp4.boxes.FullBox;
+import mp4.MP4InputStream;
 
 /**
- * This box within a Media Box declares the process by which the media-data in
- * the track is presented, and thus, the nature of the media in a track. For
- * example, a video track would be handled by a video handler.
- *
- * This box when present within a Meta Box, declares the structure or format of
- * the 'meta' box contents.
- *
- * There is a general handler for metadata streams of any type; the specific
- * format is identified by the sample entry, as for video or audio, for example.
- * If they are in text, then a MIME format is supplied to document their format;
- * if in XML, each sample is a complete XML document, and the namespace of the
- * XML is also supplied.
- * @author in-somnia
+ * ...
+ * @author Daniel Uranga
  */
+
 class HandlerBox extends FullBox
 {
 
 	//ISO BMFF types
-	public static var TYPE_VIDEO = 1986618469; //vide
-	public static var TYPE_SOUND = 1936684398; //soun
-	public static var TYPE_HINT = 1751740020; //hint
-	public static var TYPE_META = 1835365473; //meta
-	public static var TYPE_NULL = 1853189228; //null
+	public static inline var TYPE_VIDEO : Int = 1986618469; //vide
+	public static inline var TYPE_SOUND : Int = 1936684398; //soun
+	public static inline var TYPE_HINT : Int = 1751740020; //hint
+	public static inline var TYPE_META : Int = 1835365473; //meta
+	public static inline var TYPE_NULL : Int = 1853189228; //null
 	//MP4 types
-	public static var TYPE_ODSM = 1868854125; //odsm
-	public static var TYPE_CRSM = 1668445037; //crsm
-	public static var TYPE_SDSM = 1935962989; //sdsm
-	public static var TYPE_M7SM = 1832350573; //m7sm
-	public static var TYPE_OCSM = 1868788589; //ocsm
-	public static var TYPE_IPSM = 1768977261; //ipsm
-	public static var TYPE_MJSM = 1835692909; //mjsm
-	var handlerType : Int;
-	var handlerName : String;
+	public static inline var TYPE_ODSM : Int = 1868854125; //odsm
+	public static inline var TYPE_CRSM : Int = 1668445037; //crsm
+	public static inline var TYPE_SDSM : Int = 1935962989; //sdsm
+	public static inline var TYPE_M7SM : Int = 1832350573; //m7sm
+	public static inline var TYPE_OCSM : Int = 1868788589; //ocsm
+	public static inline var TYPE_IPSM : Int = 1768977261; //ipsm
+	public static inline var TYPE_MJSM : Int = 1835692909; //mjsm
+	private var handlerType : Int;
+	private var handlerName : String;
 
 	public function new()
 	{
 		super("Handler Box");
 	}
 
-	override function decode(in_ : MP4InputStream)
+	override public function decode(input : MP4InputStream)
 	{
-		super.decode(in_);
+		super.decode(input);
 
-		in_.skipBytes(4); //pre-defined: 0
+		input.skipBytes(4); //pre-defined: 0
 
-		handlerType = in_.readBytes(4);
+		handlerType = input.readBytes(4);
 
-		in_.readBytes(4); //reserved
-		in_.readBytes(4); //reserved
-		in_.readBytes(4); //reserved
-
-		handlerName = in_.readUTFString(getLeft(in_), MP4InputStream.UTF8);
+		input.readBytes(4); //reserved
+		input.readBytes(4); //reserved
+		input.readBytes(4); //reserved
+		left -= 20;
+		
+		var of = input.getOffset();
+		handlerName = input.readUTFString(left, MP4InputStream.UTF8);
+		left -= /*handlerName.length + 1*/ ((input.getOffset()-of));
+		
+		//trace("asdasd: " + (input.getOffset()-of) + " " + handlerName.length);
+		
 	}
 
 	/**
@@ -94,7 +70,7 @@ class HandlerBox extends FullBox
 	 *
 	 * @return the handler type
 	 */
-	public function getHandlerType()
+	public function getHandlerType() : Int
 	{
 		return handlerType;
 	}
@@ -105,8 +81,9 @@ class HandlerBox extends FullBox
 	 * 
 	 * @return the handler type's name
 	 */
-	public function getHandlerName()
+	public function getHandlerName() : String
 	{
 		return handlerName;
 	}
+	
 }
