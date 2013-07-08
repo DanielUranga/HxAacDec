@@ -1,84 +1,46 @@
-/*
- *  Copyright (C) 2011 in-somnia
- * 
- *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
- *  License, or (at your option) any later version.
- *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
- *  Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library.
- *  If not, see <http://www.gnu.org/licenses/>.
- */
 package mp4.boxes.impl;
-
-import mp4.MP4InputStream;
+import flash.Vector;
 import mp4.boxes.FullBox;
+import mp4.MP4InputStream;
 
 /**
- * This box contains an explicit timeline map. Each entry defines part of the
- * track time-line: by mapping part of the media time-line, or by indicating
- * 'empty' time, or by defining a 'dwell', where a single time-point in the
- * media is held for a period.
- *
- * Starting offsets for tracks (streams) are represented by an initial empty
- * edit. For example, to play a track from its start for 30 seconds, but at 10
- * seconds into the presentation, we have the following edit list:
- *
- * [0]:
- * Segment-duration = 10 seconds
- * Media-Time = -1
- * Media-Rate = 1
- *
- * [1]:
- * Segment-duration = 30 seconds (could be the length of the whole track)
- * Media-Time = 0 seconds
- * Media-Rate = 1
+ * ...
+ * @author Daniel Uranga
  */
+
 class EditListBox extends FullBox
 {
 
-	var segmentDuration : Array<Int>;
-	var mediaTime : Array<Int>;
-	var mediaRate : Array<Float>;
+	private var segmentDuration : Vector<Int>;
+	private var mediaTime : Vector<Int>;
+	private var mediaRate : Vector<Float>;
 
 	public function new()
 	{
 		super("Edit List Box");
 	}
 
-	override function decode(in_ : MP4InputStream)
+	override public function decode(input : MP4InputStream)
 	{
-		super.decode(in_);
+		super.decode(input);
 
-		var entryCount = in_.readBytes(4);
-		var len = (version == 1) ? 8 : 4;
-		
-		/*
-		segmentDuration = new long[entryCount];
-		mediaTime = new long[entryCount];
-		mediaRate = new double[entryCount];
-		*/
-		segmentDuration = []; segmentDuration.length = entryCount;
-		mediaTime = []; mediaTime.length = entryCount;
-		mediaRate = []; mediaRate.length = entryCount;
-		
-		
+		var entryCount : Int = input.readBytes(4);
+		left -= 4;
+		var len : Int = (version==1) ? 8 : 4;
+
+		segmentDuration = new Vector<Int>(entryCount);
+		mediaTime = new Vector<Int>(entryCount);
+		mediaRate = new Vector<Float>(entryCount);
+
 		for (i in 0...entryCount)
 		{
-			segmentDuration[i] = in_.readBytes(len);
-			mediaTime[i] = in_.readBytes(len);
-			
+			segmentDuration[i] = input.readBytes(len);
+			mediaTime[i] = input.readBytes(len);
+
 			//int(16) mediaRate_integer;
 			//int(16) media_rate_fraction = 0;
-			mediaRate[i] = in_.readFixedPoint(16, 16);
+			mediaRate[i] = input.readFixedPoint(4, MP4InputStream.MASK16);
+			left -= (2*len)+4;
 		}
 	}
 
@@ -86,7 +48,7 @@ class EditListBox extends FullBox
 	 * The segment duration is an integer that specifies the duration of this
 	 * edit segment in units of the timescale in the Movie Header Box.
 	 */
-	public function getSegmentDuration()
+	public function getSegmentDuration() : Vector<Int>
 	{
 		return segmentDuration;
 	}
@@ -99,7 +61,7 @@ class EditListBox extends FullBox
 	 * the duration in the Movie Header Box, and the track's duration is
 	 * expressed as an implicit empty edit at the end.
 	 */
-	public function getMediaTime()
+	public function getMediaTime() : Vector<Int>
 	{
 		return mediaTime;
 	}
@@ -110,8 +72,9 @@ class EditListBox extends FullBox
 	 * edit is specifying a ‘dwell’: the media at media-time is presented for the
 	 * segment-duration. Otherwise this field shall contain the value 1.
 	 */
-	public function getMediaRate()
+	public function getMediaRate() : Vector<Float>
 	{
 		return mediaRate;
 	}
+	
 }

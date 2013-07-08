@@ -1,23 +1,32 @@
 package mp4.boxes;
+import flash.Vector;
+import mp4.MP4InputStream;
 
-interface Box 
+/**
+ * ...
+ * @author Daniel Uranga
+ */
+
+interface Box
 {
+	
+	public function getParent() : Box;
 
-	function getParent() : Box;
+	public function decode(input : MP4InputStream) : Void;
 
 	/**
 	 * Returns the size of this box including its header.
 	 *
 	 * @return this box's size
 	 */
-	function getSize() : Int;
+	public function getSize() : Int;
 
 	/**
 	 * Returns the type of this box as a 4CC converted to a long.
 	 * 
 	 * @return this box's type
 	 */
-	function getType() : Int;
+	public function getType() : Int;
 
 	/**
 	 * Returns the offset of this box in the stream/file. This is needed as a
@@ -25,7 +34,7 @@ interface Box
 	 *
 	 * @return this box's offset
 	 */
-	function getOffset() : Int;
+	public function getOffset() : Int;
 
 	/**
 	 * Returns the name of this box as a human-readable string 
@@ -33,14 +42,14 @@ interface Box
 	 *
 	 * @return this box's name
 	 */
-	function getName() : String;
+	public function getName() : String;
 
 	/**
 	 * Indicates if this box has children.
 	 *
 	 * @return true if this box contains at least one child
 	 */
-	function hasChildren() : Bool;
+	public function hasChildren() : Bool;
 
 	/**
 	 * Indicated if the box has a child with the given type.
@@ -48,7 +57,7 @@ interface Box
 	 * @param type the type of child box to look for
 	 * @return true if this box contains at least one child with the given type
 	 */
-	function hasChild(long type) : Bool;
+	public function hasChild(type : Int) : Bool;
 
 	/**
 	 * Returns an ordered and unmodifiable list of all direct children of this
@@ -56,7 +65,7 @@ interface Box
 	 *
 	 * @return this box's children
 	 */
-	function getChildren() : List<Box>;
+	public function getAllChildren() : Vector<Box>;
 
 	/**
 	 * Returns an ordered and unmodifiable list of all direct children of this
@@ -67,7 +76,7 @@ interface Box
 	 * @param type the type of child boxes to look for
 	 * @return this box's children with the given type
 	 */
-	function getChildren(type : Int) : List<Box>;
+	public function getChildren(type : Int) : Vector<Box>;
 
 	/**
 	 * Returns the child box with the specified type. If this box has no child
@@ -80,5 +89,6 @@ interface Box
 	 * @param type the type of child box to look for
 	 * @return the first child box with the given type, or null if none is found
 	 */
-	function getChild(type : Int) : Box;
+	public function getChild(type : Int) : Box;
+	
 }

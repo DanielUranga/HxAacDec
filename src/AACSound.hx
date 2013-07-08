@@ -1,22 +1,3 @@
-/*
-	Copyright 2011 Nestor Daniel Uranga
-	
-	This file is part of HxAacDec.
-
-    HxAacDec is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    HxAacDec is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with HxAacDec.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package ;
 import flash.events.Event;
 import flash.events.IOErrorEvent;
@@ -31,6 +12,11 @@ import haxe.io.BytesData;
 import impl.adts.ADTSDemultiplexer;
 import impl.BitStream;
 import impl.error.BitsBuffer;
+import mp4.api.AudioTrack;
+import mp4.api.Frame;
+import mp4.api.Movie;
+import mp4.api.Track;
+import mp4.MP4Container;
 
 /**
  * ...
@@ -53,7 +39,6 @@ class AACSound
 	
 	public function new(request : URLRequest)
 	{
-		trace("new AACSound " + request.url);
 		rawInput = new URLStream();
 		rawInput.load(request);
 		decoder = null;
@@ -88,10 +73,12 @@ class AACSound
 
 			trace(rawInput.bytesAvailable);
 			var x : String;
-			do {
+			do
+			{
 				x = "";
 				var c : UInt;
-				do {
+				do
+				{
 					c = rawInput.readUnsignedByte();
 					if ( c == 10 || c == 13 )
 						break;
@@ -118,7 +105,7 @@ class AACSound
 			bitBuffer.writeBytes(buffer);
 			bitBuffer.position = pos;			
 			writePos += buffer.length;
-		}		
+		}
 	}
 	
 	public function sampleDataEvent(event : SampleDataEvent)

@@ -31,9 +31,9 @@ class BitStream
 	private static inline var WORD_BYTES : Int = 4;
 	private static inline var BYTE_MASK : Int = 0xff;
 	//private var buffer : BytesData;	
-	private var buffer : Vector<Int>;
-	private var pos : Int; //offset in the buffer array
-	private var cache : Int; //current 4 bytes, that are read from the buffer
+	var buffer : Vector<Int>;
+	var pos : Int; //offset in the buffer array
+	var cache : Int; //current 4 bytes, that are read from the buffer
 	var bitsCached : Int; //remaining bits in current cache
 	var position : Int; //number of total bits read
 
@@ -75,12 +75,19 @@ class BitStream
 	public function addData(data : BytesData)
 	{
 		//buffer.writeBytes(data);
+		while (data.bytesAvailable > 0)
+		{
+			buffer.push(data.readByte());
+		}
+		/*
 		var start : Int = buffer.length;
 		buffer.length += data.length;
 		for ( i in start...buffer.length )
 		{
+			trace(i + " " + (i - data.length));
 			buffer[i] = data[i - data.length];
 		}
+		*/
 	}
 
 	public inline function byteAlign()
@@ -97,9 +104,23 @@ class BitStream
 		position = 0;
 	}
 
+	/**
+	 * Devuelve la posicion en bits
+	 */
 	public inline function getPosition()
 	{
 		return position;
+	}
+	
+	/**
+	 * 
+	 * @param	position La posicion en bits
+	 */
+	public function setPosition(position : Int)
+	{
+		trace("seek2 " + position/8);		
+		this.pos = Std.int(position/8);
+		bitsCached = 0;
 	}
 
 	public inline function getBitsLeft()
@@ -113,6 +134,10 @@ class BitStream
 	 */
 	public /*inline*/ function readCache(peek : Bool) : Int
 	{
+		if(pos>buffer.length-WORD_BYTES)
+		{
+			return throw ("end of stream");
+		}
 		var i : Int
 		//if(pos>buffer.length-WORD_BYTES) throw ("end of stream");
 		= ((buffer[pos]&BYTE_MASK)<<24)

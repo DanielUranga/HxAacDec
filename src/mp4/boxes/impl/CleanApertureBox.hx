@@ -1,93 +1,80 @@
-/*
- *  Copyright (C) 2011 in-somnia
- * 
- *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
- *  License, or (at your option) any later version.
- *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
- *  Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library.
- *  If not, see <http://www.gnu.org/licenses/>.
- */
 package mp4.boxes.impl;
-
+import mp4.boxes.FullBox;
 import mp4.MP4InputStream;
-import mp4.boxes.BoxImpl;
 
-class CleanApertureBox extends BoxImpl
+/**
+ * ...
+ * @author Daniel Uranga
+ */
+
+class CleanApertureBox extends FullBox
 {
 
-	var cleanApertureWidthN : Int;
-	var cleanApertureWidthD : Int;
-	var cleanApertureHeightN : Int;
-	var cleanApertureHeightD : Int;
-	var horizOffN : Int;
-	var horizOffD : Int;
-	var vertOffN : Int;
-	var vertOffD : Int;
+	private var cleanApertureWidthN : Int;
+	private var cleanApertureWidthD : Int;
+	private var cleanApertureHeightN : Int;
+	private var cleanApertureHeightD : Int;
+	private var horizOffN : Int;
+	private var horizOffD : Int;
+	private var vertOffN : Int;
+	private var vertOffD : Int;
 
-	public function()
+	public function new()
 	{
 		super("Clean Aperture Box");
 	}
-	
-	override function decode(in_ : mp4.MP4InputStream)
+
+	override public function decode(input : MP4InputStream)
 	{
-		cleanApertureWidthN = in_.readBytes(4);
-		cleanApertureWidthD = in_.readBytes(4);
-		cleanApertureHeightN = in_.readBytes(4);
-		cleanApertureHeightD = in_.readBytes(4);
-		horizOffN = in_.readBytes(4);
-		horizOffD = in_.readBytes(4);
-		vertOffN = in_.readBytes(4);
-		vertOffD = in_.readBytes(4);
+		cleanApertureWidthN = input.readBytes(4);
+		cleanApertureWidthD = input.readBytes(4);
+		cleanApertureHeightN = input.readBytes(4);
+		cleanApertureHeightD = input.readBytes(4);
+		horizOffN = input.readBytes(4);
+		horizOffD = input.readBytes(4);
+		vertOffN = input.readBytes(4);
+		vertOffD = input.readBytes(4);
+		left -= 32;
 	}
 
-	public function getCleanApertureWidthN()
+	public function getCleanApertureWidthN() : Int
 	{
 		return cleanApertureWidthN;
 	}
 
-	public function getCleanApertureWidthD()
+	public function getCleanApertureWidthD() : Int
 	{
 		return cleanApertureWidthD;
 	}
 
-	public function getCleanApertureHeightN()
+	public function getCleanApertureHeightN() : Int
 	{
 		return cleanApertureHeightN;
 	}
 
-	public function getCleanApertureHeightD()
+	public function getCleanApertureHeightD() : Int
 	{
 		return cleanApertureHeightD;
 	}
 
-	public function getHorizOffN()
+	public function getHorizOffN() : Int
 	{
 		return horizOffN;
 	}
 
-	public functiongetHorizOffD()
+	public function getHorizOffD() : Int
 	{
 		return horizOffD;
 	}
 
-	public function getVertOffN()
+	public function getVertOffN() : Int
 	{
 		return vertOffN;
 	}
 
-	public function getVertOffD()
+	public function getVertOffD() : Int
 	{
 		return vertOffD;
 	}
+	
 }

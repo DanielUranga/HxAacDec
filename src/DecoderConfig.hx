@@ -1,22 +1,3 @@
-/*
-	Copyright 2011 Nestor Daniel Uranga
-	
-	This file is part of HxAacDec.
-
-    HxAacDec is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    HxAacDec is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with HxAacDec.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package ;
 import flash.utils.ByteArray;
 import flash.Vector;
@@ -213,53 +194,67 @@ class DecoderConfig
 			else config.sampleFrequency = SampleFrequency.forInt(sf);
 			config.channelConfiguration = ChannelConfiguration.forInt(input.readBits(4));
 
+			/*
 			switch(config.profile)
 			{
-				case x if (x==Profile.AAC_SBR):
+			*/
+			if (config.profile==Profile.AAC_SBR)
+			{
+				config.extProfile = config.profile;
+				config.sbrPresent = true;
+				sf = input.readBits(4);
+				if (sf == 0xF)
 				{
-					config.extProfile = config.profile;
-					config.sbrPresent = true;
-					sf = input.readBits(4);
-					if (sf == 0xF)
-					{
-						throw("extended sample rate specified explicitly, not supported yet!");
-						//bits.readBits(24);
-					}
-					//if sample frequencies are the same: downsample SBR
-					config.downSampledSBR = config.sampleFrequency.getIndex()==sf;
-					config.sampleFrequency = SampleFrequency.forInt(sf);
-					config.profile = readProfile(input);
+					throw("extended sample rate specified explicitly, not supported yet!");
+					//bits.readBits(24);
 				}
-				case x if (x==Profile.AAC_MAIN || x==Profile.AAC_LC || x==Profile.AAC_SSR || x==Profile.AAC_LTP || x==Profile.ER_AAC_LC || x==Profile.ER_AAC_LTP || x==Profile.ER_AAC_LD):
-				{
-					//ga-specific info:
-					config.frameLengthFlag = input.readBool();
-					if(config.frameLengthFlag) throw("config uses 960-sample frames, not yet supported");
-					config.dependsOnCoreCoder = input.readBool();
-					if(config.dependsOnCoreCoder) config.coreCoderDelay = input.readBits(14);
-					else config.coreCoderDelay = 0;
-					config.extensionFlag = input.readBool();
-
-					if (config.channelConfiguration == ChannelConfiguration.CHANNEL_CONFIG_NONE)
-					{
-						//PCE()
-					}
-
-					if (config.extensionFlag)
-					{
-						if (config.profile.isErrorResilientProfile())
-						{
-							config.sectionDataResilience = input.readBool();
-							config.scalefactorResilience = input.readBool();
-							config.spectralDataResilience = input.readBool();
-						}
-						//extensionFlag3
-						input.skipBit();
-					}
-				}
-				default:
-					throw("profile not supported: "+config.profile.getIndex());
+				//if sample frequencies are the same: downsample SBR
+				config.downSampledSBR = config.sampleFrequency.getIndex()==sf;
+				config.sampleFrequency = SampleFrequency.forInt(sf);
+				config.profile = readProfile(input);
 			}
+			else if (
+				config.profile == Profile.AAC_MAIN ||
+				config.profile == Profile.AAC_LC ||
+				config.profile == Profile.AAC_SSR ||
+				config.profile == Profile.AAC_LTP ||
+				config.profile == Profile.ER_AAC_LC ||
+				config.profile == Profile.ER_AAC_LTP ||
+				config.profile==Profile.ER_AAC_LD)
+			{
+				//ga-specific info:
+				config.frameLengthFlag = input.readBool();
+				if(config.frameLengthFlag) throw("config uses 960-sample frames, not yet supported");
+				config.dependsOnCoreCoder = input.readBool();
+				if(config.dependsOnCoreCoder) config.coreCoderDelay = input.readBits(14);
+				else config.coreCoderDelay = 0;
+				config.extensionFlag = input.readBool();
+
+				if (config.channelConfiguration == ChannelConfiguration.CHANNEL_CONFIG_NONE)
+				{
+					//PCE()
+				}
+
+				if (config.extensionFlag)
+				{
+					if (config.profile.isErrorResilientProfile())
+					{
+						config.sectionDataResilience = input.readBool();
+						config.scalefactorResilience = input.readBool();
+						config.spectralDataResilience = input.readBool();
+					}
+					//extensionFlag3
+					input.skipBit();
+				}
+			}
+			else
+			{
+				
+				throw("profile not supported: " + config.profile.getIndex());
+			}
+			/*
+			}
+			*/
 		}
 		input.destroy();
 		return config;

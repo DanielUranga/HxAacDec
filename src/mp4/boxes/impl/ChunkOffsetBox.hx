@@ -1,55 +1,42 @@
-/*
- *  Copyright (C) 2011 in-somnia
- * 
- *  This file is part of JAAD.
- * 
- *  JAAD is free software; you can redistribute it and/or modify it 
- *  under the terms of the GNU Lesser General Public License as 
- *  published by the Free Software Foundation; either version 3 of the 
- *  License, or (at your option) any later version.
- *
- *  JAAD is distributed in the hope that it will be useful, but WITHOUT 
- *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General 
- *  Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library.
- *  If not, see <http://www.gnu.org/licenses/>.
- */
 package mp4.boxes.impl;
-
-import mp4.boxes.BoxTypes;
+import flash.Vector;
 import mp4.boxes.FullBox;
 import mp4.MP4InputStream;
+
+/**
+ * ...
+ * @author Daniel Uranga
+ */
 
 class ChunkOffsetBox extends FullBox
 {
 
-	private var chunks : Array<Int>;
+	private var chunks : Vector<Int>;
 
-	public ChunkOffsetBox()
+	public function new()
 	{
 		super("Chunk Offset Box");
 	}
-	
-	override function decode(in_ : MP4InputStream)
-	{
-		super.decode(in_);
 
-		var = (type==BoxTypes.CHUNK_LARGE_OFFSET_BOX) ? 8 : 4;
-		var entryCount = in_.readBytes(4);
-		//chunks = new long[entryCount];
-		chunks = new Array<Int>();
+	override public function decode(input : MP4InputStream)
+	{
+		super.decode(input);
+
+		var len : Int = (type==BoxTypes.CHUNK_LARGE_OFFSET_BOX) ? 8 : 4;
+		var entryCount : Int = input.readBytes(4);
+		chunks = new Vector<Int>(entryCount);
+		left -= 4;
 
 		for (i in 0...entryCount)
 		{
-			chunks[i] = in_.readBytes(len);
+			chunks[i] = input.readBytes(len);
+			left -= len;
 		}
 	}
 
-	public function getChunks()
+	public function getChunks() : Vector<Int>
 	{
 		return chunks;
 	}
+	
 }
